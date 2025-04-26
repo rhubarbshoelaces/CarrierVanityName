@@ -79,32 +79,13 @@ class TargetFragment : Fragment() {
     }
 
     private fun onSetName(text: String, isoRegion: String) {
-        var p = PersistableBundle();
-        if (isoRegion.isNotEmpty()) {
-            if (isoRegion.length == 2) {
-                p.putString(CarrierConfigManager.KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, isoRegion.lowercase(
-                    Locale.ROOT
-                )
-                )
-            } else {
-                Toast.makeText(context, "Invalid ISO region!", Toast.LENGTH_SHORT).show()
-                return
-            }
-        }
-        Toast.makeText(context, "Set carrier vanity name to \"$text\"", Toast.LENGTH_SHORT).show()
-
-        p.putBoolean(CarrierConfigManager.KEY_CARRIER_NAME_OVERRIDE_BOOL, true)
-        p.putString(CarrierConfigManager.KEY_CARRIER_NAME_STRING, text)
-        p.putString(CarrierConfigManager.KEY_CARRIER_CONFIG_VERSION_STRING, /* trans rights! 🏳️‍⚧️*/ ":3")
-        p.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL, true)
-
-        val subId: Int;
-        if (selectedSub == 1) {
-            subId = subId1!!
+        if (text.isNotEmpty()) {
+            // Determine the selected subscription ID
+            val subId = if (selectedSub == 1) subId1 else subId2
+            sendCarrierNameBroadcast(text, isoRegion, subId)
         } else {
-            subId = subId2!!
+            Toast.makeText(context, "Please enter a carrier name.", Toast.LENGTH_SHORT).show()
         }
-        overrideCarrierConfig(subId, p)
     }
 
     private fun onResetName() {
@@ -154,4 +135,13 @@ class TargetFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    private fun sendCarrierNameBroadcast(newName: String, isoRegion: String, subId: Int) {
+    val intent = Intent("gay.nullby.carriername.SET_CARRIER_NAME").apply {
+        putExtra("new_carrier_name", newName)
+        putExtra("iso_region", isoRegion)
+        putExtra("subscription_id", subId)
+    }
+    context?.sendBroadcast(intent)
+}
 }
