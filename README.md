@@ -60,6 +60,7 @@ adb shell am broadcast \
 ## ⚠️ Disclaimer
 **WARNING**: Anything using Shizuku might potentially cause harm to your device (and the data on it). I'm not responsible for any damage that might be caused by this app. You have been warned.
 
+Building this app may also require this moddified android.jar: https://github.com/Reginer/aosp-android-jar/tree/main/android-31
 ---
 
 [You can download a prebuilt APK here](https://github.com/rhubarbshoelaces/CarrierVanityName/releases)
