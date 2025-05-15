@@ -35,9 +35,14 @@ Action: gay.nullby.carriername.SET_CARRIER_NAME
 Package: gay.nullby.carriername
 Class: gay.nullby.carriername.CarrierNameReceiver
 Extras:
-  new_carrier_name=Hello 🌤️
-  subscription_id=1
-  iso_region=us
+  new_carrier_name
+  Hello 🌤️
+
+  subscription_id
+  1
+
+  iso_region
+  us
 ```
 
 ### ADB Shell Command Example
