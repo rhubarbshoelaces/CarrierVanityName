@@ -34,15 +34,15 @@ This fork introduces several improvements:
 Action: gay.nullby.carriername.SET_CARRIER_NAME
 Package: gay.nullby.carriername
 Class: gay.nullby.carriername.CarrierNameReceiver
-Extras:
-  new_carrier_name
-  Hello 🌤️
+Text Extras:
+  Name: new_carrier_name
+  Value: Hello 🌤️
 
-  subscription_id
-  1
+  Name: subscription_id
+  Value: 1
 
-  iso_region
-  us
+  Name: iso_region
+  Value: us
 ```
 
 ### ADB Shell Command Example
