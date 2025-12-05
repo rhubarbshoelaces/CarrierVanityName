@@ -1,4 +1,4 @@
-package gay.nullby.carriername
+package valid.name.carriername
 
 import android.content.Context
 import android.os.Bundle
@@ -18,7 +18,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Toast
 import com.android.internal.telephony.ICarrierConfigLoader
-import gay.nullby.carriername.databinding.FragmentTargetBinding
+import valid.name.carriername.databinding.FragmentTargetBinding
 import rikka.shizuku.ShizukuBinderWrapper
 import java.util.Locale
 
@@ -137,7 +137,7 @@ class TargetFragment : Fragment() {
     }
 
     private fun sendCarrierNameBroadcast(newName: String, isoRegion: String, subId: Int) {
-    val intent = Intent("gay.nullby.carriername.SET_CARRIER_NAME").apply {
+    val intent = Intent("valid.name.carriername.SET_CARRIER_NAME").apply {
         putExtra("new_carrier_name", newName)
         putExtra("iso_region", isoRegion)
         putExtra("subscription_id", subId)

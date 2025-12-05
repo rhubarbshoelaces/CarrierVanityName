@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'gay.nullby.carriername'
+    namespace 'valid.name.carriername'
     compileSdk 33
 
     defaultConfig {
-        applicationId "gay.nullby.carriername"
+        applicationId "valid.name.carriername"
         minSdk 28
         targetSdk 33
         versionCode 2

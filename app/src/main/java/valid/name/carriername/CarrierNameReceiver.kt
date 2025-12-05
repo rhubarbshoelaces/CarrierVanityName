@@ -2,7 +2,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import gay.nullby.carriername.TargetFragment
+import valid.name.carriername.TargetFragment
 import android.telephony.TelephonyManager
 
 class CarrierNameReceiver : BroadcastReceiver() {

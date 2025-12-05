@@ -1,4 +1,4 @@
-package gay.nullby.carriername
+package valid.name.carriername
 
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import gay.nullby.carriername.databinding.FragmentSetupBinding
+import valid.name.carriername.databinding.FragmentSetupBinding
 import rikka.shizuku.Shizuku
 
 class SetupFragment : Fragment() {
