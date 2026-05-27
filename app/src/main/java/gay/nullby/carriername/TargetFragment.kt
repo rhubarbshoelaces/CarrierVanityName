@@ -1,6 +1,10 @@
 package gay.nullby.carriername
 
+import android.app.IActivityManager
+import android.app.UiAutomationConnection
+import android.content.ComponentName
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.telephony.CarrierConfigManager
@@ -20,6 +24,9 @@ import android.widget.Toast
 import com.android.internal.telephony.ICarrierConfigLoader
 import gay.nullby.carriername.databinding.FragmentTargetBinding
 import rikka.shizuku.ShizukuBinderWrapper
+import rikka.shizuku.SystemServiceHelper
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 class TargetFragment : Fragment() {
@@ -79,13 +86,32 @@ class TargetFragment : Fragment() {
     }
 
     private fun onSetName(text: String, isoRegion: String) {
-        if (text.isNotEmpty()) {
-            // Determine the selected subscription ID
-            val subId = if (selectedSub == 1) subId1 else subId2
-            sendCarrierNameBroadcast(text, isoRegion, subId)
-        } else {
-            Toast.makeText(context, "Please enter a carrier name.", Toast.LENGTH_SHORT).show()
+        var p = PersistableBundle();
+        if (isoRegion.isNotEmpty()) {
+            if (isoRegion.length == 2) {
+                p.putString(CarrierConfigManager.KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, isoRegion.lowercase(
+                    Locale.ROOT
+                )
+                )
+            } else {
+                Toast.makeText(context, "Invalid ISO region!", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
+        Toast.makeText(context, "Set carrier vanity name to \"$text\"", Toast.LENGTH_SHORT).show()
+
+        p.putBoolean(CarrierConfigManager.KEY_CARRIER_NAME_OVERRIDE_BOOL, true)
+        p.putString(CarrierConfigManager.KEY_CARRIER_NAME_STRING, text)
+        p.putString(CarrierConfigManager.KEY_CARRIER_CONFIG_VERSION_STRING, /* trans rights! 🏳️‍⚧️*/ ":3")
+        p.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL, true)
+
+        val subId: Int;
+        if (selectedSub == 1) {
+            subId = subId1!!
+        } else {
+            subId = subId2!!
+        }
+        overrideCarrierConfig(subId, p)
     }
 
     private fun onResetName() {
@@ -120,6 +146,10 @@ class TargetFragment : Fragment() {
     }
 
     private fun overrideCarrierConfig(subId: Int, p: PersistableBundle?) {
+        if (shouldUseBroker()) {
+            overrideCarrierConfigViaBroker(subId, p)
+            return
+        }
         val carrierConfigLoader = ICarrierConfigLoader.Stub.asInterface(
             ShizukuBinderWrapper(
                 TelephonyFrameworkInitializer
@@ -131,17 +161,51 @@ class TargetFragment : Fragment() {
         carrierConfigLoader.overrideConfig(subId, p, true)
     }
 
+    // The October 2025 Pixel security patch tightened caller-identity checks on
+    // ICarrierConfigLoader.overrideConfig, so a Shizuku-proxied (shell-UID) call no
+    // longer succeeds. On affected builds we route through an Instrumentation hosted
+    // in our own process via IActivityManager.startInstrumentation, which is the
+    // same workaround pixel-volte-patch (GPL-3.0) uses.
+    private fun shouldUseBroker(): Boolean {
+        val patch = Build.VERSION.SECURITY_PATCH ?: return false
+        val date = try {
+            SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(patch)
+        } catch (e: Exception) {
+            null
+        } ?: return false
+        val cal = Calendar.getInstance().apply { time = date }
+        val year = cal.get(Calendar.YEAR)
+        val month = cal.get(Calendar.MONTH) // 0-indexed; 9 == October
+        return year > 2025 || (year == 2025 && month >= 9)
+    }
+
+    private fun overrideCarrierConfigViaBroker(subId: Int, p: PersistableBundle?) {
+        val ctx = context ?: return
+        val am = IActivityManager.Stub.asInterface(
+            ShizukuBinderWrapper(SystemServiceHelper.getSystemService(Context.ACTIVITY_SERVICE))
+        )
+        val args = Bundle().apply {
+            putInt(BrokerInstrumentation.ARG_SUB_ID, subId)
+            if (p == null) {
+                putBoolean(BrokerInstrumentation.ARG_CLEAR, true)
+            } else {
+                putParcelable(BrokerInstrumentation.ARG_OVERRIDES, p)
+            }
+        }
+        am.startInstrumentation(
+            ComponentName(ctx, BrokerInstrumentation::class.java),
+            null,
+            8,
+            args,
+            null,
+            UiAutomationConnection(),
+            0,
+            null,
+        )
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
-    private fun sendCarrierNameBroadcast(newName: String, isoRegion: String, subId: Int) {
-    val intent = Intent("gay.nullby.carriername.SET_CARRIER_NAME").apply {
-        putExtra("new_carrier_name", newName)
-        putExtra("iso_region", isoRegion)
-        putExtra("subscription_id", subId)
-    }
-    context?.sendBroadcast(intent)
-}
 }
