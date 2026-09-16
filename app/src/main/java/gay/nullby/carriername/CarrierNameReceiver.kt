@@ -21,10 +21,13 @@ class CarrierNameReceiver : BroadcastReceiver() {
             ?: intent.getStringExtra("new_carrier_name")
             ?: return
 
+        val simSlot = intent.getIntExtra("sim_slot", -1)
+
         if (newCarrierName.isBlank()) return
 
-        // Grab the default active SIM slot ID dynamically
-        val subId = SubscriptionManager.getDefaultSubscriptionId()
+        val subId = SubscriptionManager.getSubId(simSlot)?.get(0)
+            ?: SubscriptionManager.getDefaultSubscriptionId()
+
         if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) return
 
         try {
